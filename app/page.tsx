@@ -1,10 +1,11 @@
-/**
- * Home Page
- *
- * This is the landing page. Navigate users to the schedule page.
- */
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
+import { AppointmentService } from "@/services/appointmentService"; // your folder is servicess
+import { Doctor } from "@/types";
+
+const service = new AppointmentService();
+const doctors: Doctor[] = service.getAllDoctors();
 
 export default function HomePage() {
   return (
@@ -15,14 +16,13 @@ export default function HomePage() {
         </h1>
 
         <p className="text-gray-600 mb-6">
-          Welcome to the appointment scheduling system. View and manage doctor schedules
-          for our hospital.
+          Welcome to the appointment scheduling system. View and manage doctor schedules.
         </p>
 
         <div className="space-y-4">
           <Link
             href="/schedule"
-            className="block w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors"
+            className="block w-full bg-green-600 hover:bg-gray-700 text-white font-semibold py-3 px-6 rounded-lg text-center transition-colors"
           >
             Go to Schedule
           </Link>
@@ -30,9 +30,9 @@ export default function HomePage() {
           <div className="border-t border-gray-200 pt-4">
             <h2 className="text-sm font-semibold text-gray-700 mb-2">Available Doctors:</h2>
             <ul className="text-sm text-gray-600 space-y-1">
-              <li>• Dr. Sarah Chen - Cardiology</li>
-              <li>• Dr. Michael Rodriguez - Pediatrics</li>
-              <li>• Dr. Emily Johnson - General Practice</li>
+              {doctors.map((doc) => (
+                <li key={doc.id}>• {doc.name} - {doc.specialty}</li>
+              ))}
             </ul>
           </div>
         </div>

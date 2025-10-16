@@ -1,169 +1,89 @@
-/**
- * WeekView Component
- *
- * Displays appointments for a week (Monday - Sunday) in a grid format.
- *
- * TODO for candidates:
- * 1. Generate a 7-day grid (Monday through Sunday)
- * 2. Generate time slots for each day
- * 3. Position appointments in the correct day and time
- * 4. Make it responsive (may need horizontal scroll on mobile)
- * 5. Color-code appointments by type
- * 6. Handle overlapping appointments
- */
-
-'use client';
-
-import type { Appointment, Doctor } from '@/types';
+import { Appointment, Patient } from "@/types";
+import { addDays, format, endOfWeek } from "date-fns";
 
 interface WeekViewProps {
   appointments: Appointment[];
-  doctor: Doctor | undefined;
-  weekStartDate: Date; // Should be a Monday
+  weekStartDate: Date;
+  patients: Patient[];
+  doctorName: string;
 }
 
-/**
- * WeekView Component
- *
- * Renders a weekly calendar grid with appointments.
- *
- * TODO: Implement this component
- *
- * Architecture suggestions:
- * 1. Generate an array of 7 dates (Mon-Sun) from weekStartDate
- * 2. Generate time slots (same as DayView: 8 AM - 6 PM)
- * 3. Create a grid: rows = time slots, columns = days
- * 4. Position appointments in the correct cell (day + time)
- *
- * Consider:
- * - How to make the grid scrollable horizontally on mobile?
- * - How to show day names and dates in headers?
- * - How to handle appointments that span multiple hours?
- * - Should you reuse logic from DayView?
- */
-export function WeekView({ appointments, doctor, weekStartDate }: WeekViewProps) {
-  /**
-   * TODO: Generate array of 7 dates (Monday through Sunday)
-   *
-   * Starting from weekStartDate, create an array of the next 7 days
-   */
-  function getWeekDays(): Date[] {
-    // TODO: Implement week days generation
-    // Example:
-    // return [
-    //   new Date(weekStartDate), // Monday
-    //   addDays(weekStartDate, 1), // Tuesday
-    //   ...
-    //   addDays(weekStartDate, 6), // Sunday
-    // ];
-    return [];
-  }
+const HOURS = Array.from({ length: 11 }, (_, i) => 8 + i); // 8:00 - 18:00
+const APPOINTMENT_COLORS: Record<string, string> = {
+  checkup: "#3b82f6",
+  consultation: "#10b981",
+  "follow-up": "#f59e0b",
+  procedure: "#8b5cf6",
+};
 
-  /**
-   * TODO: Generate time slots (same as DayView)
-   */
-  function generateTimeSlots() {
-    // TODO: Implement (can be same as DayView)
-    return [];
-  }
+export default function WeekView({ appointments, weekStartDate, patients, doctorName }: WeekViewProps) {
+  const days = Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
+  const weekEndDate = endOfWeek(weekStartDate, { weekStartsOn: 1 });
 
-  /**
-   * TODO: Get appointments for a specific day
-   */
-  function getAppointmentsForDay(date: Date): Appointment[] {
-    // TODO: Filter appointments that fall on this specific day
-    return [];
-  }
+  const getPatientName = (appointment?: Appointment) =>
+    appointment ? patients.find((p) => p.id === appointment.patientId)?.name : "";
 
-  /**
-   * TODO: Get appointments for a specific day and time slot
-   */
-  function getAppointmentsForDayAndSlot(date: Date, slotStart: Date): Appointment[] {
-    // TODO: Filter appointments for this day and time
-    return [];
+  if (!appointments.length) {
+    return <div className="text-center py-6 text-gray-500">No appointments this week</div>;
   }
-
-  const weekDays = getWeekDays();
-  const timeSlots = generateTimeSlots();
 
   return (
-    <div className="week-view">
-      {/* Week header */}
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-gray-900">
-          {/* TODO: Format week range (e.g., "Oct 14 - Oct 20, 2024") */}
-          Week View
-        </h3>
-        {doctor && (
-          <p className="text-sm text-gray-600">
-            Dr. {doctor.name} - {doctor.specialty}
-          </p>
-        )}
+    <div className="overflow-x-auto">
+      <div className="flex justify-between items-center mb-2">
+        <div className="font-bold text-lg">{doctorName}</div>
+        <div className="text-sm text-gray-600">
+          {format(weekStartDate, "MMM d")} - {format(weekEndDate, "MMM d, yyyy")}
+        </div>
       </div>
 
-      {/* Week grid - may need horizontal scroll on mobile */}
-      <div className="border border-gray-200 rounded-lg overflow-x-auto">
-        {/* TODO: Implement the week grid */}
-        <div className="text-center text-gray-500 py-12">
-          <p>Week View Grid Goes Here</p>
-          <p className="text-sm mt-2">
-            Implement 7-day grid (Mon-Sun) with time slots
-          </p>
-
-          {/* Placeholder to show appointments exist */}
-          {appointments.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium">
-                {appointments.length} appointment(s) for this week
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* TODO: Replace above with actual grid implementation */}
-        {/* Example structure:
-        <table className="min-w-full">
-          <thead>
-            <tr>
-              <th className="w-20 p-2 text-xs bg-gray-50">Time</th>
-              {weekDays.map((day, index) => (
-                <th key={index} className="p-2 text-xs bg-gray-50 border-l">
-                  <div className="font-semibold">{format(day, 'EEE')}</div>
-                  <div className="text-gray-600">{format(day, 'MMM d')}</div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {timeSlots.map((slot, slotIndex) => (
-              <tr key={slotIndex} className="border-t">
-                <td className="p-2 text-xs text-gray-600">{slot.label}</td>
-                {weekDays.map((day, dayIndex) => (
-                  <td key={dayIndex} className="p-1 border-l align-top min-h-[60px]">
-                    {getAppointmentsForDayAndSlot(day, slot.start).map(apt => (
-                      <AppointmentCard key={apt.id} appointment={apt} compact />
-                    ))}
-                  </td>
-                ))}
-              </tr>
+      <table className="w-full table-fixed border-collapse border">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border p-2 w-16">Time</th>
+            {days.map((day) => (
+              <th key={day.toISOString()} className="border p-2">
+                {format(day, "EEE")}
+                <br />
+                {format(day, "d")}
+              </th>
             ))}
-          </tbody>
-        </table>
-        */}
-      </div>
+          </tr>
+        </thead>
+        <tbody>
+          {HOURS.map((hour) =>
+            [0, 30].map((minute) => (
+              <tr key={`${hour}-${minute}`} className="border-b">
+                <td className="border p-2 text-sm w-16">
+                  {`${hour.toString().padStart(2, "0")}:${minute === 0 ? "00" : "30"}`}
+                </td>
+                {days.map((day) => {
+                  const slotTime = new Date(day);
+                  slotTime.setHours(hour, minute, 0, 0);
 
-      {/* Empty state */}
-      {appointments.length === 0 && (
-        <div className="mt-4 text-center text-gray-500 text-sm">
-          No appointments scheduled for this week
-        </div>
-      )}
+                  const apt = appointments.find(
+                    (a) => new Date(a.startTime).getTime() === slotTime.getTime()
+                  );
+
+                  return (
+                    <td key={day.toISOString() + hour + minute} className="border p-2 h-12">
+                      {apt ? (
+                        <span
+                          className="px-2 py-1 rounded text-white text-sm block truncate"
+                          style={{ backgroundColor: APPOINTMENT_COLORS[apt.type] || "#6b7280" }}
+                        >
+                          {getPatientName(apt)}
+                        </span>
+                      ) : (
+                        ""
+                      )}
+                    </td>
+                  );
+                })}
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
-
-/**
- * TODO: Consider reusing the AppointmentCard component from DayView
- *
- * You might want to add a "compact" prop to make it smaller for week view
- */

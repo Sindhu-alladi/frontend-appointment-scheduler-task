@@ -295,4 +295,9 @@ export function getAppointmentsByDoctorAndDateRange(
     const aptStart = new Date(apt.startTime);
     return aptStart >= startDate && aptStart <= endDate;
   });
-}
+  }
+
+export const appointments: Appointment[] = [/* ... */];
+export const doctors: Doctor[] = [/* ... */];
+export const patients: Patient[] = [/* ... */];
+
