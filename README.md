@@ -363,8 +363,6 @@ If requirements are unclear, make reasonable assumptions and document them in yo
 
 ---
 
-## 📞 Support
-
 If you encounter setup issues:
 - Check Node version (18+)
 - Try `rm -rf node_modules && npm install`
